@@ -1,0 +1,14 @@
+[*.cs]
+dotnet_diagnostic.IDE0007.severity = none # 明示的な型ではなく ' var ' を使用します。
+dotnet_diagnostic.IDE0008.severity = none #  'var' ではなく明示的な型を使用します
+dotnet_diagnostic.IDE0044.severity = none # Make field readonly
+dotnet_diagnostic.IDE0051.severity = none # Private member 'Hoge' is unused.
+dotnet_diagnostic.IDE0052.severity = none # Private member can be removed as the value assigned to it is never read.
+dotnet_diagnostic.IDE0055.severity = none # 書式設定の修正
+dotnet_diagnostic.IDE0058.severity = none # Expression value is never used
+dotnet_diagnostic.IDE0060.severity = none # Remove unused parameter
+dotnet_style_require_accessibility_modifiers = never # Accessibility modifiers required
+csharp_new_line_before_open_brace=none
+
+[*.{cs,vb}]
+end_of_line=lf
