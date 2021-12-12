@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <PackageId>TEA.Base</PackageId>
     <TargetFrameworks>net48;net5.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <LangVersion>9.0</LangVersion>
