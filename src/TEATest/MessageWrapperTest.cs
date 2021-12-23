@@ -28,5 +28,25 @@ namespace TEATest {
             dispatcher.Dispatch(-3);
             msgs.ToArray().Is(new[] { -2 });
         }
+
+        [Test]
+        public void SetupMaybeTest() {
+            var dispatcher = new BufferDispatcher<string>();
+            var inner = new BufferDispatcher<string>();
+            dispatcher.SetupMaybe(inner, msg => msg == "hoge" ? null : msg);
+
+            var msgs = new List<string>();
+            inner.Setup(new BufferDispatcher<string>(), (_, msg) => msgs.Add(msg));
+
+            dispatcher.Dispatch("1");
+            msgs.ToArray().Is(new[] { "1" });
+            msgs.Clear();
+
+            dispatcher.Dispatch("hoge");
+            msgs.ToArray().Is(Array.Empty<string>());
+
+            dispatcher.Dispatch("2");
+            msgs.ToArray().Is(new[] { "2" });
+        }
     }
 }
