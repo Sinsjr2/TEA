@@ -25,6 +25,15 @@ namespace TEA {
         }
 
         /// <summary>
+        ///  ディスパッチャを呼び出すアクションを設定します。
+        /// </summary>
+        public static void Setup<TSource, TResult>(this ISetup<TSource> target,
+                                                   IDispatcher<TResult> dispatcher,
+                                                   Action<IDispatcher<TResult>, TSource> dispatch) {
+            target.Setup(new MessageWrapper<TSource, TResult>(dispatcher, dispatch));
+        }
+
+        /// <summary>
         ///  メッセージの変換とディスパッチを設定します。
         /// </summary>
         public static void Setup<TSource, TResult>(this ISetup<TSource> target,

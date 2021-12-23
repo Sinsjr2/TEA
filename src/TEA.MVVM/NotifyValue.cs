@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -17,9 +18,9 @@ namespace TEA.MVVM {
         IDispatcher<T>? dispatcher;
 
         /// <summary>
-        ///  通知するかを判定するための比較器
+        ///  通知するかを判定するための同値判定
         /// </summary>
-        readonly IEqualityComparer<T> comparer;
+        readonly Func<T, T, bool> isSame;
 
         T currentValue;
 
@@ -29,7 +30,7 @@ namespace TEA.MVVM {
         public T Value {
             get => currentValue;
             set {
-                if (comparer.Equals(currentValue, value)) {
+                if (isSame(currentValue, value)) {
                     return;
                 }
                 currentValue = value;
@@ -38,7 +39,12 @@ namespace TEA.MVVM {
         }
 
         public NotifyValue(T initial, IEqualityComparer<T>? comparer = null) {
-            this.comparer = comparer ?? EqualityComparer<T>.Default;
+            isSame = comparer is null ? (a, b) => EqualityComparer<T>.Default.Equals(a, b) : comparer.Equals;
+            currentValue = initial;
+        }
+
+        public NotifyValue(T initial, Func<T, T, bool> isSame) {
+            this.isSame = isSame;
             currentValue = initial;
         }
 
@@ -50,7 +56,7 @@ namespace TEA.MVVM {
             // 同値判定で参照が同じであればtrueを返せるように毎回代入する
             var prev = currentValue;
             currentValue = state;
-            if (comparer.Equals(prev, state)) {
+            if (isSame(prev, state)) {
                 return;
             }
             PropertyChanged?.Invoke(this, ValueProeprty);

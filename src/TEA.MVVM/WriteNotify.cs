@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -14,9 +15,9 @@ namespace TEA.MVVM {
         public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
-        ///  通知するかを判定するための比較器
+        ///  通知するかを判定するための同値判定
         /// </summary>
-        readonly IEqualityComparer<T> comparer;
+        readonly Func<T, T, bool> isSame;
 
         /// <summary>
         ///  Viewとのバインディング用変数
@@ -27,7 +28,15 @@ namespace TEA.MVVM {
         ///  比較器がnullであればデフォルトの比較を行います。
         /// </summary>
         public WriteNotify(T initial, IEqualityComparer<T>? comparer = null) {
-            this.comparer = comparer ?? EqualityComparer<T>.Default;
+            isSame = comparer is null ? (a, b) => EqualityComparer<T>.Default.Equals(a, b) : comparer.Equals;
+            Value = initial;
+        }
+
+        /// <summary>
+        ///  ラムダ式で比較を行います。
+        /// </summary>
+        public WriteNotify(T initial, Func<T, T, bool> isSame) {
+            this.isSame = isSame;
             Value = initial;
         }
 
@@ -35,7 +44,7 @@ namespace TEA.MVVM {
             // 同値判定で参照が同じであればtrueを返せるように毎回代入する
             var prev = Value;
             Value = state;
-            if (comparer.Equals(Value, state)) {
+            if (isSame(Value, state)) {
                 return;
             }
             PropertyChanged?.Invoke(this, ValueProeprty);
