@@ -63,19 +63,15 @@ namespace TEA {
             // 代入できるスペースがある場合は異なっていれば書き換える
             for (; e.MoveNext(); i++) {
                 if (dest.Count <= i) {
-                    break;
+                    dest.Add(e.Current);
+                    continue;
                 }
                 var x = e.Current;
                 if (!comparer.Equals(dest[i], x)) {
                     dest[i] = x;
                 }
             }
-            while(e.MoveNext()) {
-                dest.Add(e.Current);
-            }
-            // 最後まで書き込めたときは配列全体の要素数を返し、
-            // 余った場合は、書き込んだ位置のインデックスを返す。
-            return Math.Max(dest.Count, i);
+            return i;
         }
     }
 }
