@@ -87,8 +87,8 @@ namespace TEA.MVVM {
             foreach (var notify in selections) {
                 notify.Value.Render(false);
             }
-            if (Value != null && selections.TryGetValue(Value, out var currentNotify)) {
-                currentNotify.Render(!comparer.Equals(state, noneSelection));
+            if (Value != null) {
+                this[state].Render(!comparer.Equals(state, noneSelection));
             }
             else {
                 Value = noneSelection;
