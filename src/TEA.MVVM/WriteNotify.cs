@@ -44,7 +44,7 @@ namespace TEA.MVVM {
             // 同値判定で参照が同じであればtrueを返せるように毎回代入する
             var prev = Value;
             Value = state;
-            if (isSame(Value, state)) {
+            if (isSame(prev, state)) {
                 return;
             }
             PropertyChanged?.Invoke(this, ValueProeprty);

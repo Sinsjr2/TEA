@@ -60,7 +60,6 @@ namespace TEA.MVVM {
                 if (changeState != ChangeState.None || selectedIndex == value) {
                     return;
                 }
-                selectedIndex = value;
                 changeState = ChangeState.ChaingingIndex;
                 try {
                     dispatcher?.Dispatch(value);
@@ -70,14 +69,20 @@ namespace TEA.MVVM {
                     if (changeState == ChangeState.Rendered) {
                         var backup = ItemsSource;
                         ItemsSource = tempList;
+                        selectedIndex = -1;
                         // 一度リストを入れ替えることでインデックスを設定できるようにする
                         PropertyChanged?.Invoke(this, ItemsSourceProperty);
                         // バインディングした時に何か値が入っているかもしれないのでクリア
                         tempList.Clear();
                         ItemsSource = backup;
+                        selectedIndex = value;
+                        PropertyChanged?.Invoke(this, ItemsSourceProperty);
                         // リストの要素数を変更した時のインデックスの通知を無視しているため
                         // 強制的にインデックスの通知を行う
                         RenderCurrentState(true);
+                    }
+                    else {
+                        selectedIndex = value;
                     }
                 }
                 finally {
@@ -111,7 +116,14 @@ namespace TEA.MVVM {
                 changeState = ChangeState.Rendered;
                 return;
             }
-            RenderCurrentState(prevIndex != state.SelectedIndex);
+            // コンボボックスの要素数を変化されるとViewから通知されるので選択しているインデックスを捨てるため
+            changeState = ChangeState.Rendered;
+            try {
+                RenderCurrentState(prevIndex != state.SelectedIndex);
+            }
+            finally {
+                changeState = ChangeState.None;
+            }
         }
 
         void RenderCurrentState(bool notifyIndex) {
@@ -123,10 +135,16 @@ namespace TEA.MVVM {
             }
             var endIndex = ItemsSource.ApplyToList(items, comparer);
             // 配列の要素の移動を最小化するために後ろから削除する
-            for (int i = ItemsSource.Count; endIndex < i; i--) {
+            for (int i = ItemsSource.Count - 1; endIndex <= i; i--) {
                 ItemsSource.RemoveAt(i);
             }
             if (notifyIndex) {
+                // View のインデックスが-1になったまま戻らなくなるため、
+                // 一度別の値に変えた後に強制的に別の値にしている
+                var backup = selectedIndex;
+                selectedIndex = -1;
+                PropertyChanged?.Invoke(this, SelectedIndexProperty);
+                selectedIndex = backup;
                 PropertyChanged?.Invoke(this, SelectedIndexProperty);
             }
         }
