@@ -11,30 +11,34 @@ namespace TEA.MVVM {
     /// </summary>
     public class NotifyValue<T> : INotifyPropertyChanged, ITEAComponent<T, T> {
 
+        enum InnerState {
+            None,
+            Notifying,
+            SetValue,
+            RetryRender,
+        }
+
         static PropertyChangedEventArgs ValueProeprty = new(nameof(Value));
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        IDispatcher<T>? dispatcher;
 
         /// <summary>
         ///  通知するかを判定するための同値判定
         /// </summary>
         readonly Func<T, T, bool> isSame;
 
-        T currentValue;
+        public event PropertyChangedEventHandler? PropertyChanged;
+        IDispatcher<T>? dispatcher;
+        InnerState innerState;
 
+        T? latestSetValue = default;
+        T currentValue;
         /// <summary>
         ///  Viewとのバインディング用変数
         /// </summary>
         public T Value {
             get => currentValue;
             set {
-                if (isSame(currentValue, value)) {
-                    return;
-                }
-                currentValue = value;
-                dispatcher?.Dispatch(value);
+                latestSetValue = value;
+                NotifyCore(value, true);
             }
         }
 
@@ -53,13 +57,48 @@ namespace TEA.MVVM {
         }
 
         public void Render(T state) {
-            // 同値判定で参照が同じであればtrueを返せるように毎回代入する
-            var prev = currentValue;
+            NotifyCore(state, false);
+        }
+
+        void NotifyCore(T state, bool isFromSetter) {
+            if (isSame(currentValue, state)) {
+                    return;
+            }
             currentValue = state;
-            if (isSame(prev, state)) {
+            // avoid loop;
+            if (innerState != InnerState.None) {
+                innerState = isFromSetter ? InnerState.SetValue
+                    : innerState == InnerState.SetValue ? InnerState.SetValue
+                    : InnerState.RetryRender;
                 return;
             }
-            PropertyChanged?.Invoke(this, ValueProeprty);
+            innerState = InnerState.Notifying;
+            try {
+                if (isFromSetter) {
+                    dispatcher?.Dispatch(currentValue);
+                }
+                T prevState;
+                do {
+                    innerState = InnerState.Notifying;
+                    prevState = currentValue;
+                    PropertyChanged?.Invoke(this, ValueProeprty);
+                    var prevInnerState = innerState;
+                    if (innerState == InnerState.SetValue) {
+                        innerState = InnerState.Notifying;
+                        dispatcher?.Dispatch(latestSetValue!);
+                    }
+                    if (prevInnerState != InnerState.Notifying || innerState != InnerState.Notifying) {
+                        innerState = InnerState.Notifying;
+                        prevState = currentValue;
+                        PropertyChanged?.Invoke(this, ValueProeprty);
+                    }
+                }
+                while (innerState != InnerState.Notifying && !isSame(currentValue, prevState));
+            }
+            finally {
+                innerState = InnerState.None;
+                latestSetValue = default;
+            }
         }
     }
 }
