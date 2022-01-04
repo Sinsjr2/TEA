@@ -41,12 +41,10 @@ namespace TEA.MVVM {
         }
 
         public void Render(T state) {
-            // 同値判定で参照が同じであればtrueを返せるように毎回代入する
-            var prev = Value;
-            Value = state;
-            if (isSame(prev, state)) {
+            if (isSame(Value, state)) {
                 return;
             }
+            Value = state;
             PropertyChanged?.Invoke(this, ValueProeprty);
         }
     }
