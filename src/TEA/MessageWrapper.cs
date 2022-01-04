@@ -49,7 +49,6 @@ namespace TEA {
         public static void SetupMaybe<TSource, TResult>(this ISetup<TSource> target,
                                                         IDispatcher<TResult> dispatcher,
                                                         Func<TSource, TResult?> selector)
-        // where TResult : class
         {
                 target.Setup(new MessageWrapper<TSource, TResult>(dispatcher, (d, msg) => {
                     var x = selector(msg);
@@ -58,22 +57,5 @@ namespace TEA {
                     }
                 }));
         }
-
-        // /// <summary>
-        // ///  メッセージの変換と同時にディスパッチするかを判定するラムダ式を設定します。
-        // ///  nullを返すとディスパッチしません。
-        // ///  値型用
-        // /// </summary>
-        // public static void SetupMaybe<TSource, TResult>(this ISetup<TSource> target,
-        //                                                 IDispatcher<TResult> dispatcher,
-        //                                                 Func<TSource, TResult?> selector)
-        //     where TResult : struct {
-        //         target.Setup(new MessageWrapper<TSource, TResult>(dispatcher, (d, msg) => {
-        //             var x = selector(msg);
-        //             if (x is not null) {
-        //                 d.Dispatch(x.Value);
-        //             }
-        //         }));
-        // }
     }
 }
