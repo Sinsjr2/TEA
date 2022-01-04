@@ -18,7 +18,7 @@ namespace TEA.MVVM {
         static readonly PropertyChangedEventArgs ValueProperty = new(nameof(Value));
 
 #pragma warning disable CS8714 // キーがnullにならないようにメソッドを使用するときにnullチェックをしている
-        readonly Dictionary<TKind, NotifyValue< bool>> selections = new();
+        readonly Dictionary<TKind, NotifyValue<bool>> selections = new();
 #pragma warning restore CS8714
         readonly BufferDispatcher<TKind> dispatcher = new();
         readonly TKind noneSelection;
@@ -37,12 +37,12 @@ namespace TEA.MVVM {
         ///  バインディングする値を取得します。
         ///  生成していない場合は新しく値を作ります。
         ///  取得したインスタンスに対して直接レンダリングしないでください。
-        ///  コンストラクタで設定した未選択用の値を取得すると例外が発生します。
+        ///  コンストラクタで設定した未選択用の値やnullを取得すると例外が発生します。
         /// </summary>
         public NotifyValue<bool> this[TKind kind] {
             get {
-                if (isSame(kind, noneSelection)) {
-                    throw new ArgumentException("can not get value: " + kind?.ToString() ?? "null", nameof(kind));
+                if (kind is null || isSame(kind, noneSelection)) {
+                    throw new ArgumentException("can not get value: " + (kind?.ToString() ?? "null"), nameof(kind));
                 }
                 if (!selections.TryGetValue(kind, out var notify)) {
                     notify = new NotifyValue<bool>(false);
