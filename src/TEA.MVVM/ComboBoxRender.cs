@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -21,7 +22,7 @@ namespace TEA.MVVM {
         static readonly PropertyChangedEventArgs SelectedIndexProperty = new(nameof(Value));
         static readonly PropertyChangedEventArgs ItemsSourceProperty = new(nameof(ItemsSource));
 
-        readonly IEqualityComparer<T>? comparer;
+        readonly Func<T, T, bool> isSame;
 
         IDispatcher<int>? dispatcher;
 
@@ -79,7 +80,13 @@ namespace TEA.MVVM {
         public ObservableCollection<T> ItemsSource { get; private set; } = new();
 
         public ComboBoxRender(IEqualityComparer<T>? comparer = null) {
-            this.comparer = comparer;
+            this.isSame = comparer is null
+                ? (a, b) => EqualityComparer<T>.Default.Equals(a, b)
+                : (a, b) => comparer.Equals(a, b);
+        }
+
+        public ComboBoxRender(Func<T, T, bool> isSame) {
+            this.isSame = isSame;
         }
 
         public void Setup(IDispatcher<int> dispatcher) {
@@ -117,7 +124,7 @@ namespace TEA.MVVM {
             var backupIndex = selectedIndex;
             // set Value -1 so return -1.
             selectedIndex = -1;
-            var endIndex = ItemsSource.ApplyToList(items, comparer);
+            var endIndex = ItemsSource.ApplyToList(items, isSame);
             // 配列の要素の移動を最小化するために後ろから削除する
             for (int i = ItemsSource.Count - 1; endIndex <= i; i--) {
                 ItemsSource.RemoveAt(i);

@@ -48,6 +48,16 @@ namespace TEA {
             state);
         }
 
+        public static int ApplyToList<T>(this IList<T> dest,
+                                         IEnumerable<T> source,
+                                         IEqualityComparer<T>? comparer = null) {
+            return dest.ApplyToList(
+                source,
+                comparer is null
+                ? (a, b) => EqualityComparer<T>.Default.Equals(a, b)
+                : (a, b) => comparer.Equals(a, b));
+        }
+
         /// <summary>
         ///  値が異なっていれば書き込み、そうでなければ何もしません。
         ///  要素数が足りない場合は追加します。
@@ -56,8 +66,7 @@ namespace TEA {
         /// </summary>
         public static int ApplyToList<T>(this IList<T> dest,
                                          IEnumerable<T> source,
-                                         IEqualityComparer<T>? comparer = null) {
-            comparer ??= EqualityComparer<T>.Default;
+                                         Func<T, T, bool> isSame) {
             using var e = source.GetEnumerator();
             int i = 0;
             // 代入できるスペースがある場合は異なっていれば書き換える
@@ -67,7 +76,7 @@ namespace TEA {
                     continue;
                 }
                 var x = e.Current;
-                if (!comparer.Equals(dest[i], x)) {
+                if (!isSame(dest[i], x)) {
                     dest[i] = x;
                 }
             }
