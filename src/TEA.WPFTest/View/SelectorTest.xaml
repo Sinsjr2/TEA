@@ -9,7 +9,7 @@
              d:DataContext="{d:DesignInstance Type=vm:SelectorTestViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="450" d:DesignWidth="800">
     <StackPanel>
-        <Button Content="select 2" Command="{Binding Select2Btn}"/>
+        <Button Content="select 3" Command="{Binding Select3Btn}"/>
         <ListBox SelectedIndex="{Binding ListItems.Value}" ItemsSource="{Binding ListItems.ItemsSource}">
             <ListBox.ItemTemplate>
                 <DataTemplate>

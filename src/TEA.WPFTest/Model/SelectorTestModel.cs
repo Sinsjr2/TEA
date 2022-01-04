@@ -37,7 +37,7 @@ namespace TEA.WPFTest.Model {
                     5 => this with { ListBoxPattern = 5 },
                     _ => this with { ListBoxPattern = 0 }
                 },
-                OnClickChangeTo2Button msg => this with { ListBoxPattern = 2 },
+                OnClickChangeTo3Button msg => this with { ListBoxPattern = 3 },
                 _ => this
             };
         }
