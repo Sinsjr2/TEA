@@ -80,7 +80,7 @@ namespace TEA.MVVM {
         public ObservableCollection<T> ItemsSource { get; private set; } = new();
 
         public ComboBoxRender(IEqualityComparer<T>? comparer = null) {
-            this.isSame = comparer is null
+            isSame = comparer is null
                 ? (a, b) => EqualityComparer<T>.Default.Equals(a, b)
                 : (a, b) => comparer.Equals(a, b);
         }
