@@ -136,7 +136,6 @@ namespace TEATest {
 
         class CaptureValueMiddleware : IDispatcher<int> {
             readonly ITEA<CountUpModel, int> tea;
-            int dispatchedCount = 0;
 
             public CountUpModel? GotValue { get; private set; }
 
@@ -145,11 +144,8 @@ namespace TEATest {
             }
 
             public void Dispatch(int msg) {
-                dispatchedCount++;
                 tea.Dispatch(msg);
-                if (dispatchedCount == 9) {
-                    GotValue = tea.Current;
-                }
+                GotValue = tea.Current;
             }
         }
 
@@ -163,6 +159,7 @@ namespace TEATest {
 
         class RepeatAndLatestRender : ITEAComponent<CountUpModel, int> {
             IDispatcher<int>? dispatcher;
+            public int RenderCount { private set; get; }
 
             public CountUpModel? LatestValue { get; private set; }
 
@@ -171,6 +168,7 @@ namespace TEATest {
             }
 
             public void Render(CountUpModel state) {
+                RenderCount++;
                 LatestValue = state;
                 if (state.ShouldDispatch) {
                     for (int i = 0; i < 10; i++) {
@@ -193,6 +191,7 @@ namespace TEATest {
             var tea = new TEA<CountUpModel, int>(initial, render);
             var middleware = new CaptureValueMiddleware(tea);
             dispatcher.Setup(middleware);
+            render.RenderCount.Is(1);
 
             // 何回もdispatch していなことを確認
             render.LatestValue!.RenderedCount.Is(0);
@@ -200,8 +199,9 @@ namespace TEATest {
 
             // ディスパッチ中でも状態を取得できることを確認
             tea.Dispatch(0);
+            render.RenderCount.Is(3);
             render.LatestValue.RenderedCount.Is(11);
-            middleware.GotValue!.RenderedCount.Is(10);
+            middleware.GotValue!.RenderedCount.Is(11);
         }
 
         class ExceptionForTest : Exception { }
@@ -251,7 +251,6 @@ namespace TEATest {
 
             tea.Dispatch(false);
             tea.Current.RenderedCount.Is(13);
-
         }
     }
 }

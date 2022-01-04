@@ -30,7 +30,7 @@ namespace TEATest {
         }
 
         [Test]
-        public void SetupMaybeTest() {
+        public void SetupMaybeWithClassTest() {
             var dispatcher = new BufferDispatcher<string>();
             var inner = new BufferDispatcher<string>();
             dispatcher.SetupMaybe(inner, msg => msg == "hoge" ? null : msg);
@@ -47,6 +47,21 @@ namespace TEATest {
 
             dispatcher.Dispatch("2");
             msgs.ToArray().Is(new[] { "2" });
+        }
+
+        [Test]
+        [TestCase(true, 5)]
+        [TestCase(true, 0)]
+        [TestCase(false, 5)]
+        public void SetupMaybeWithStructTest(bool pass, int dispatchValue) {
+            var dispatcher = new BufferDispatcher<int>();
+            var inner = new BufferDispatcher<int?>();
+            dispatcher.SetupMaybe(inner, msg => pass ? msg : null);
+
+            var msgs = new List<int>();
+            inner.Setup(new BufferDispatcher<int>(), (_, msg) => msgs.Add(msg!.Value));
+            dispatcher.Dispatch(dispatchValue);
+            msgs.ToArray().Is(pass ? new[] { dispatchValue } : Array.Empty<int>());
         }
     }
 }

@@ -5,10 +5,17 @@
     <TargetFrameworks>net48;net5.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <LangVersion>9.0</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <DevelopmentDependency>true</DevelopmentDependency>
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Sinsjr2</Authors>
+    <Description>MVU framework inspired by Redux and The Elm Architecture.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Sinsjr2/TEA</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Sinsjr2/TEA</RepositoryUrl>
+    <Copyright>Copyright (c) 2020 Sinsjr2</Copyright>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 </Project>

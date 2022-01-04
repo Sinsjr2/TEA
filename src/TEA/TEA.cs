@@ -2,22 +2,38 @@ using System;
 using System.Collections.Generic;
 
 namespace TEA {
-    public class TEA<State, Message> : ITEA<State, Message>
-        where State : IUpdate<State, Message> {
+    public class TEA<TState, TMessage> : ITEA<TState, TMessage>
+        where TState : IUpdate<TState, TMessage> {
 
-        readonly IRender<State> render;
+        /// <summary>
+        ///  レンダリングの状況を表します。
+        /// </summary>
+        enum State {
+            None,
+
+            /// <summary>
+            ///  レンダリング中
+            /// </summary>
+            Rendering,
+
+            /// <summary>
+            ///  レンダリング中にディスパッチされた
+            /// </summary>
+            Dispached,
+        }
+
+        readonly IRender<TState> render;
         readonly int maxRendering;
-        readonly int cacheMessageListSize;
-        bool isCallingRender = false;
+        State teaState = State.None;
 
         /// <summary>
         ///   実行するべきメッセージ
         /// </summary>
-        readonly List<Message> messages = new List<Message>(16);
+        readonly List<TMessage> messages = new(16);
 
 
-        State currentState;
-        public State Current {
+        TState currentState;
+        public TState Current {
             get {
                 try {
                     foreach (var msg in messages) {
@@ -42,39 +58,41 @@ namespace TEA {
         /// 1以上でないと一回でもレンダリングすると例外が発生します。
         /// この回数以上レンダリングすると無限ループしている可能性があるので例外を発生させます。
         /// </param>
-        public TEA(State initialState, IRender<State> render, int cacheMessageListSize = 16, int maxRendering = 10) {
+        public TEA(TState initialState, IRender<TState> render, int cacheMessageListSize = 16, int maxRendering = 10) {
             this.maxRendering = maxRendering;
-            this.cacheMessageListSize = cacheMessageListSize;
+            messages = new(cacheMessageListSize);
             this.render = render;
             currentState = initialState;
             Render();
         }
 
-        public void Dispatch(Message msg) {
+        public void Dispatch(TMessage msg) {
             messages.Add(msg);
-            if (isCallingRender) {
+            if (teaState != State.None) {
+                teaState = State.Dispached;
                 return;
             }
             Render();
         }
 
         void Render() {
-            isCallingRender = true;
+            teaState = State.Rendering;
             try {
                 // 無限ループを回避するため
                 // レンダリングした回数
                 for (int renderCount = 0; renderCount < maxRendering; renderCount++) {
                     render.Render(Current);
-                    // レンダー呼び出し中にdispacherが呼ばれたかが変更されたか
-                    if (messages.Count <= 0) {
+                    // レンダー呼び出し中にディスパッチされたか
+                    if (teaState != State.Dispached) {
                         return;
                     }
+                    teaState = State.Rendering;
                 }
                 throw new InvalidOperationException($"レンダリングが指定された回数以上行われました。最大回数:{maxRendering}/n現在の状態:{currentState}");
             } finally {
                 // 例外が発生したあとでもdispatchが呼び出せるようにしておく
                 // もしくは、正常にreturnされた場合
-                isCallingRender = false;
+                teaState = State.None;
             }
         }
     }

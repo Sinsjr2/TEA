@@ -7,12 +7,12 @@ namespace TEA.WPFTest.ViewModel {
     public class SelectorTestViewModel : ITEAComponent<SelectorTestModel, ISelectorTestMessage>, INotifyPropertyChanged {
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public CommandRender Select2Btn { get; } = new(true);
+        public CommandRender Select3Btn { get; } = new(true);
         public ComboBoxRender<ListItem> ListItems { get; } = new();
         public ComboBoxRender<string> ComboBoxItems { get; } = new();
 
         public void Setup(IDispatcher<ISelectorTestMessage> dispatcher) {
-            Select2Btn.Setup(dispatcher, _ => Singleton<OnClickChangeTo2Button>.Instance);
+            Select3Btn.Setup(dispatcher, _ => Singleton<OnClickChangeTo3Button>.Instance);
             ListItems.Setup(dispatcher, index => new OnChangedListBoxSelectedIndex(index));
             ComboBoxItems.Setup(dispatcher, index => new OnChangedListBoxSelectedIndex(index));
         }

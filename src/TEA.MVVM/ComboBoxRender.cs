@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -15,28 +16,13 @@ namespace TEA.MVVM {
 
         enum ChangeState {
             None,
-
-            /// <summary>
-            ///  SelectedIndex を変更中
-            /// </summary>
-            ChaingingIndex,
-
-            /// <summary>
-            ///  レンダリングで値が更新された
-            /// </summary>
-            Rendered
+            Chainging,
         }
 
         static readonly PropertyChangedEventArgs SelectedIndexProperty = new(nameof(Value));
         static readonly PropertyChangedEventArgs ItemsSourceProperty = new(nameof(ItemsSource));
 
-        /// <summary>
-        ///  Viewからインデックスを変更中にインデックスを変更した場合に
-        ///  コンボボックスが更新するときのリストの入れ替えに仕様
-        /// </summary>
-        readonly ObservableCollection<T> tempList = new();
-
-        readonly IEqualityComparer<T>? comparer;
+        readonly Func<T, T, bool> isSame;
 
         IDispatcher<int>? dispatcher;
 
@@ -60,30 +46,25 @@ namespace TEA.MVVM {
                 if (changeState != ChangeState.None || selectedIndex == value) {
                     return;
                 }
-                changeState = ChangeState.ChaingingIndex;
+                selectedIndex = value;
+                changeState = ChangeState.Chainging;
                 try {
                     dispatcher?.Dispatch(value);
 
                     // Viewからインデックスの変更中にインデックスを変更すると
                     // 反映されないためその対策
-                    if (changeState == ChangeState.Rendered) {
-                        var backup = ItemsSource;
-                        ItemsSource = tempList;
+                    if (value != selectedIndex) {
+                        var itemsBackup = ItemsSource;
+                        var indexBackup = selectedIndex;
+                        ItemsSource = new ObservableCollection<T>();
                         selectedIndex = -1;
                         // 一度リストを入れ替えることでインデックスを設定できるようにする
                         PropertyChanged?.Invoke(this, ItemsSourceProperty);
-                        // バインディングした時に何か値が入っているかもしれないのでクリア
-                        tempList.Clear();
-                        ItemsSource = backup;
-                        selectedIndex = value;
+                        ItemsSource = itemsBackup;
                         PropertyChanged?.Invoke(this, ItemsSourceProperty);
-                        // リストの要素数を変更した時のインデックスの通知を無視しているため
-                        // 強制的にインデックスの通知を行う
-                        RenderCurrentState(true);
+                        selectedIndex = indexBackup;
                     }
-                    else {
-                        selectedIndex = value;
-                    }
+                    RenderCurrentState(value != selectedIndex);
                 }
                 finally {
                     changeState = ChangeState.None;
@@ -99,7 +80,13 @@ namespace TEA.MVVM {
         public ObservableCollection<T> ItemsSource { get; private set; } = new();
 
         public ComboBoxRender(IEqualityComparer<T>? comparer = null) {
-            this.comparer = comparer;
+            isSame = comparer is null
+                ? (a, b) => EqualityComparer<T>.Default.Equals(a, b)
+                : (a, b) => comparer.Equals(a, b);
+        }
+
+        public ComboBoxRender(Func<T, T, bool> isSame) {
+            this.isSame = isSame;
         }
 
         public void Setup(IDispatcher<int> dispatcher) {
@@ -113,11 +100,10 @@ namespace TEA.MVVM {
 
             // インデックス変更中はViewへの通知を先送り
             if (changeState != ChangeState.None) {
-                changeState = ChangeState.Rendered;
                 return;
             }
             // コンボボックスの要素数を変化されるとViewから通知されるので選択しているインデックスを捨てるため
-            changeState = ChangeState.Rendered;
+            changeState = ChangeState.Chainging;
             try {
                 RenderCurrentState(prevIndex != state.SelectedIndex);
             }
@@ -130,21 +116,21 @@ namespace TEA.MVVM {
             if (items is null) {
                 // 呼ばれることは無いが念のため
                 // nullである時コンボボックスは空になったほうが自然であるため
+                selectedIndex = -1;
                 ItemsSource.Clear();
                 return;
             }
-            var endIndex = ItemsSource.ApplyToList(items, comparer);
+            var prevItemsCount = ItemsSource.Count;
+            var backupIndex = selectedIndex;
+            // set Value -1 so return -1.
+            selectedIndex = -1;
+            var endIndex = ItemsSource.ApplyToList(items, isSame);
             // 配列の要素の移動を最小化するために後ろから削除する
             for (int i = ItemsSource.Count - 1; endIndex <= i; i--) {
                 ItemsSource.RemoveAt(i);
             }
-            if (notifyIndex) {
-                // View のインデックスが-1になったまま戻らなくなるため、
-                // 一度別の値に変えた後に強制的に別の値にしている
-                var backup = selectedIndex;
-                selectedIndex = -1;
-                PropertyChanged?.Invoke(this, SelectedIndexProperty);
-                selectedIndex = backup;
+            selectedIndex = backupIndex;
+            if (items.Count != prevItemsCount || notifyIndex) {
                 PropertyChanged?.Invoke(this, SelectedIndexProperty);
             }
         }
