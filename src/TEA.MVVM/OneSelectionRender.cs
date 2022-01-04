@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -21,7 +22,7 @@ namespace TEA.MVVM {
 #pragma warning restore CS8714
         readonly BufferDispatcher<TKind> dispatcher = new();
         readonly TKind noneSelection;
-        readonly IEqualityComparer<TKind> comparer;
+        readonly Func<TKind, TKind, bool> isSame;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -36,15 +37,19 @@ namespace TEA.MVVM {
         ///  バインディングする値を取得します。
         ///  生成していない場合は新しく値を作ります。
         ///  取得したインスタンスに対して直接レンダリングしないでください。
+        ///  コンストラクタで設定した未選択用の値を取得すると例外が発生します。
         /// </summary>
         public NotifyValue<bool> this[TKind kind] {
             get {
+                if (isSame(kind, noneSelection)) {
+                    throw new ArgumentException("can not get value: " + kind?.ToString() ?? "null", nameof(kind));
+                }
                 if (!selections.TryGetValue(kind, out var notify)) {
                     notify = new NotifyValue<bool>(false);
                     notify.Setup(new MessageWrapper<bool, TKind>(dispatcher, (d, isSelected) => {
                         var prevSelected = Value;
                         Value = kind;
-                        if (comparer.Equals(prevSelected, kind)) {
+                        if (isSame(prevSelected, kind)) {
                             return;
                         }
                         // １つだけtrueにするためにfalseにする
@@ -52,12 +57,12 @@ namespace TEA.MVVM {
                             notify.Value.Render(false);
                         }
                         if (Value != null && selections.TryGetValue(Value, out var currentNotify)) {
-                            currentNotify.Render(!comparer.Equals(kind, noneSelection));
+                            currentNotify.Render(!isSame(kind, noneSelection));
                         }
                         else {
                             Value = noneSelection;
                         }
-                        if (!comparer.Equals(prevSelected, kind)) {
+                        if (!isSame(prevSelected, kind)) {
                             d.Dispatch(kind);
                         }
                     }));
@@ -70,7 +75,15 @@ namespace TEA.MVVM {
         public OneSelectionRender(TKind noneSelection, IEqualityComparer<TKind>? comparer = null) {
             this.noneSelection = noneSelection;
             Value = noneSelection;
-            this.comparer = comparer ?? EqualityComparer<TKind>.Default;
+            isSame = comparer is null
+                ? (a, b) => EqualityComparer<TKind>.Default.Equals(a, b)
+                : (a, b) => comparer.Equals(a, b);
+        }
+
+        public OneSelectionRender(TKind noneSelection, Func<TKind, TKind, bool> isSame) {
+            this.noneSelection = noneSelection;
+            Value = noneSelection;
+            this.isSame = isSame;
         }
 
         public void Setup(IDispatcher<TKind> dispatcher) {
@@ -80,20 +93,20 @@ namespace TEA.MVVM {
         public void Render(TKind state) {
             var prevSelected = Value;
             Value = state;
-            if (comparer.Equals(prevSelected, state)) {
+            if (isSame(prevSelected, state)) {
                 return;
             }
             // １つだけtrueにするためにfalseにする
             foreach (var notify in selections) {
                 notify.Value.Render(false);
             }
-            if (Value != null) {
-                this[state].Render(!comparer.Equals(state, noneSelection));
+            if (Value != null && !isSame(Value, noneSelection)) {
+                this[state].Render(true);
             }
             else {
                 Value = noneSelection;
             }
-            if (!comparer.Equals(prevSelected, state)) {
+            if (!isSame(prevSelected, state)) {
                 PropertyChanged?.Invoke(this, ValueProperty);
             }
         }
