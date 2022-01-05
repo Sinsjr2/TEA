@@ -108,18 +108,17 @@ namespace TEA.MVVMTest {
         }
 
         [Test]
-        public void ItemsRemoveReturnMinus1() {
+        [TestCase(1, new[] { 0, 1, 2, 3 }, 2, new[] { 4, 5, 6 }, -1)]
+        [TestCase(1, new[] { 0, 1, 2, }, 1, new[] { 4, 5, 6 }, -1)]
+        [TestCase(2, new[] { 0, 1, 2, }, 2, new[] { 4, 5, 6 }, 0)]
+        public void ItemsRemoveReturnMinus1(int initialIndex, int[] initialItems, int nextIndex, int[] nextItems, int setValue) {
             var render = new ComboBoxRender<int>();
-            var initial = new[] { 0, 1, 2, 3 };
-            render.Render(new(1, initial));
+            render.Render(new(initialIndex, initialItems));
             bool calledChanged = false;
             render.ItemsSource.CollectionChanged += (_, args) => {
-                if (args.Action != NotifyCollectionChangedAction.Remove) {
-                    return;
-                }
                 calledChanged = true;
-                render.Value = -1;
-                render.Value.Is(-1);
+                render.Value = setValue;
+                render.Value.Is(setValue);
             };
             var actualNotify = new List<NotifyData>();
             render.PropertyChanged += (sender, args) => {
@@ -127,7 +126,7 @@ namespace TEA.MVVMTest {
                 actualNotify.Add(new NotifyData(args.PropertyName!, val.Value, val.ItemsSource.ToEqList()));
             };
 
-            var expected = new ComboBoxModel<int>(2, new[] { 4, 5, 6 });
+            var expected = new ComboBoxModel<int>(nextIndex, nextItems);
             render.Render(expected);
             render.Value.Is(expected.SelectedIndex);
             calledChanged.Is(true);

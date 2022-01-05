@@ -3,4 +3,5 @@
 
     public record OnChangedListBoxSelectedIndex(int SelectedIndex) : ISelectorTestMessage;
     public record OnClickChangeTo3Button : ISelectorTestMessage;
+    public record TogglePattern : ISelectorTestMessage;
 }

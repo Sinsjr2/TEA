@@ -42,11 +42,13 @@ namespace TEA.MVVM {
         /// </summary>
         public int Value {
             set {
-                // 自身での変更中に通知される場合は現在のstateを真として新しい値を無視する
-                if (changeState != ChangeState.None || selectedIndex == value) {
+                if (selectedIndex == value) {
                     return;
                 }
                 selectedIndex = value;
+                if (changeState != ChangeState.None) {
+                    return;
+                }
                 changeState = ChangeState.Chainging;
                 try {
                     dispatcher?.Dispatch(value);
@@ -122,15 +124,14 @@ namespace TEA.MVVM {
             }
             var prevItemsCount = ItemsSource.Count;
             var backupIndex = selectedIndex;
-            // set Value -1 so return -1.
-            selectedIndex = -1;
             var endIndex = ItemsSource.ApplyToList(items, isSame);
             // 配列の要素の移動を最小化するために後ろから削除する
             for (int i = ItemsSource.Count - 1; endIndex <= i; i--) {
                 ItemsSource.RemoveAt(i);
             }
+            var changedIndex = backupIndex != selectedIndex;
             selectedIndex = backupIndex;
-            if (items.Count != prevItemsCount || notifyIndex) {
+            if (items.Count != prevItemsCount || notifyIndex || changedIndex) {
                 PropertyChanged?.Invoke(this, SelectedIndexProperty);
             }
         }

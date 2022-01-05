@@ -9,6 +9,7 @@ dotnet_diagnostic.IDE0058.severity = none # Expression value is never used
 dotnet_diagnostic.IDE0060.severity = none # Remove unused parameter
 dotnet_style_require_accessibility_modifiers = never # Accessibility modifiers required
 csharp_new_line_before_open_brace=none
+dotnet_diagnostic.CS1591.severity = none
 
 [*.{cs,vb}]
 end_of_line=lf
