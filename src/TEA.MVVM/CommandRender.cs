@@ -9,7 +9,7 @@ namespace TEA.MVVM {
     ///  コマンドを実行できるかをレンダリングします。
     /// </summary>
     public class CommandRender<T> : INotifyPropertyChanged, ICommand, ITEAComponent<bool, T?> {
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged { add {} remove {} }
         public event EventHandler? CanExecuteChanged;
 
         IDispatcher<T?>? dispatcher;

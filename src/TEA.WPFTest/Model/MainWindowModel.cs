@@ -1,4 +1,5 @@
-﻿using TEA.WPFTest.Message.MainWindowMessage;
+﻿using System;
+using TEA.WPFTest.Message.MainWindowMessage;
 
 namespace TEA.WPFTest.Model {
     public record MainWindowModel(
@@ -9,7 +10,8 @@ namespace TEA.WPFTest.Model {
             return message switch {
                 InRadioButtonMessage msg => this with { RadioButton = RadioButton.Update(msg.Message) },
                 InSelectorTestMessage msg => this with { SelectorTest = SelectorTest.Update(msg.Message) },
-                InCollectionRenderTestMessage msg => this with { CollectionRenderTest = CollectionRenderTest.Update(msg.Message) }
+                InCollectionRenderTestMessage msg => this with { CollectionRenderTest = CollectionRenderTest.Update(msg.Message) },
+                _ => throw new ArgumentOutOfRangeException(nameof(message), message, null)
             };
         }
     }

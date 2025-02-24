@@ -9,7 +9,7 @@ namespace TEA.WPFTest.ViewModel {
         public WriteNotify<CollectionItem> CurrentState { get; } = new(new("", 0));
         public CommandRender Button { get; } = new(true);
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged { add {} remove {} }
 
         public void Setup(IDispatcher<CollectionItem> dispatcher) {
             Button.Setup(dispatcher, _ => CurrentState.Value);
@@ -24,7 +24,7 @@ namespace TEA.WPFTest.ViewModel {
 
         public CollectionRender<CollectionItemViewModel, CollectionItem, CollectionItem> List1 { get; } = new(() => new CollectionItemViewModel());
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged { add {} remove {} }
 
         public void Setup(IDispatcher<ICollectionRenderTestMessage> dispatcher) {
             List1.Setup(dispatcher, pair => new OnClickedItem(pair.Key, pair.Value));

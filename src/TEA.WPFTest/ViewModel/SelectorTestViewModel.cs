@@ -5,7 +5,7 @@ using TEA.WPFTest.Model;
 
 namespace TEA.WPFTest.ViewModel {
     public class SelectorTestViewModel : ITEAComponent<SelectorTestModel, ISelectorTestMessage>, INotifyPropertyChanged {
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged { add {} remove {} }
 
         public CommandRender Select3Btn { get; } = new(true);
         public CommandRender ChangePatternBtn { get; } = new(true);
