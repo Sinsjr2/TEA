@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TEA.WPFTest.Message.CollectionRenderTestMessage;
 
 namespace TEA.WPFTest.Model {
@@ -14,7 +15,8 @@ namespace TEA.WPFTest.Model {
             2 => new CollectionItem[] { new("this is 2", 2), new("x2_2", 2), new("x3", 3) },
             3 => new CollectionItem[] { new("sample", 100), new("sample", 100), new("sample", 100), new("sample", 100), new("sample", 100) },
             4 => new CollectionItem[] { new("sample", 100), new("sample", 100), new("sample", 100), new("sample", 100), new("sample", 100), new("sample", 100) },
-            5 => new CollectionItem[] { new("other", 10), new("x2_3", 2), new("x3_2", 3), new("x4", 4) }
+            5 => new CollectionItem[] { new("other", 10), new("x2_3", 2), new("x3_2", 3), new("x4", 4) },
+            _ => throw new ArgumentOutOfRangeException(nameof(List1Items), List1Items, null)
         };
 
         public CollectionRenderTestModel Update(ICollectionRenderTestMessage message) {
@@ -27,6 +29,7 @@ namespace TEA.WPFTest.Model {
                     5 => this with { ListBoxPattern = 5 },
                     _ => this with { ListBoxPattern = 0 }
                 },
+                _ => throw new ArgumentOutOfRangeException(nameof(message), message, null)
             };
         }
     }

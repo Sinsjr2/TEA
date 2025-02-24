@@ -6,7 +6,7 @@ using TEA.WPFTest.Model;
 namespace TEA.WPFTest.ViewModel {
 
     public class RadioButtonTestViewModel : ITEAComponent<RadioButtonTestModel, IRadioButtonTestMessage>, INotifyPropertyChanged {
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged { add {} remove {} }
 
         public OneSelectionRender<RadioButtonChecked?> RadioBtnType1 { get; } = new(null);
 

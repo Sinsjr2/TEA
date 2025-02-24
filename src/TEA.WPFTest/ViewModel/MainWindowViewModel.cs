@@ -4,7 +4,7 @@ using TEA.WPFTest.Model;
 
 namespace TEA.WPFTest.ViewModel {
     public class MainWindowViewModel : ITEAComponent<MainWindowModel, IMainWindowMessage>, INotifyPropertyChanged {
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged { add {} remove {} }
 
         public RadioButtonTestViewModel RadioButtonTest { get; } = new();
         public SelectorTestViewModel SelectorTest { get; } = new();
