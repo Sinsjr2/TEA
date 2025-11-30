@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TEA.MVVM", "TEA.MVVM\TEA.MV
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TEA.MVVMTest", "TEA.MVVMTest\TEA.MVVMTest.csproj", "{9F457E18-85D3-4402-91FA-4D13CD49AE11}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TEA.Example", "TEA.Example\TEA.Example.csproj", "{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{9F457E18-85D3-4402-91FA-4D13CD49AE11}.Release|x64.Build.0 = Release|Any CPU
 		{9F457E18-85D3-4402-91FA-4D13CD49AE11}.Release|x86.ActiveCfg = Release|Any CPU
 		{9F457E18-85D3-4402-91FA-4D13CD49AE11}.Release|x86.Build.0 = Release|Any CPU
+		{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}.Debug|x64.Build.0 = Debug|Any CPU
+		{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}.Debug|x86.Build.0 = Debug|Any CPU
+		{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}.Release|x64.ActiveCfg = Release|Any CPU
+		{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}.Release|x64.Build.0 = Release|Any CPU
+		{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}.Release|x86.ActiveCfg = Release|Any CPU
+		{D43ACA4F-EDC4-4571-AF16-A5600AED87F3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
